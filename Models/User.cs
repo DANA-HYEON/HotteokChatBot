@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HotteokChatBot.Models
 {
+    //회원
     public class User
     {
         [Key]

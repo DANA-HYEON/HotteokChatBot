@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +24,20 @@ namespace HotteokChatBot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+
+            services.AddDbContext<HotteokDbContext>(options =>
+            options.UseMySql(Configuration.GetConnectionString("HotteokDbContext"), serverVersion, mySqlOptionsAction: sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            })
+            .EnableSensitiveDataLogging() //응용 프로그램 데이터를 예외 메시지, 로깅 등에 포함할 수 있도록 함
+            .EnableDetailedErrors() //저장소 쿼리 결과를 처리 하는 동안 발생 하는 데이터 값 예외를 처리할 때 자세한 오류를 사용)
+            );
+
             services.AddControllersWithViews();
         }
 
