@@ -1,4 +1,5 @@
-﻿using HotteokChatBot.Models;
+﻿using HotteokChatBot.Data;
+using HotteokChatBot.Models;
 using HotteokChatBot.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,21 +40,41 @@ namespace HotteokChatBot.Controllers
             }
             else 
             {
-                string Toekn_Info = OauthLoginService.Get_Token(); //토큰 요청
-                JObject Root = JObject.Parse(Toekn_Info); //string to json
+                //토큰 요청
+                JObject token = OauthLoginService.Get_Token(Code);
 
-                string Access_Token = Root["access_token"].ToString();
-
-                //쿠키에 액세스토큰 저장
-                CookieOptions Options = new CookieOptions();
-                Response.Cookies.Append("access_token", Access_Token);
+                string Access_Token = token["access_token"].ToString();
+                string Refresh_Token = token["refresh_token"].ToString();
 
                 //로그인 인증정보 요청
-                string User = OauthLoginService.Get_User(Access_Token);
-                JObject 
+                JObject User = OauthLoginService.Get_User(Access_Token);
+
+                string User_Id = User["user_id"].ToString(); //트위치 external key
+                string User_Login = User["login"].ToString(); //channel name
+                
+                using (var db = new HotteokDbContext())
+                {
+                    var user = db.User.FirstOrDefault(u => u.User_Id.Equals(User_Id));
+                    if(user == null)
+                    {
+                        User model = new User();
+                        model.User_Id = long.Parse(User_Id);
+                        model.User_login = User_Login;
+                        model.Refresh_Token = Refresh_Token;
+
+                        db.User.Add(model); //insert
+                        db.SaveChanges(); //commit
+                    }
+                }
+
+                //쿠키에 액세스토큰 저장
+                Response.Cookies.Append("access_token", Access_Token);
+                //CookieOptions Options = new CookieOptions();
+                Response.Cookies.Append("channel_name", User_Login); //쿠키에 채널이름 저장
+                Response.Cookies.Append("User_Id", User_Id); //쿠키에 enxternal key 저장
+
+                return RedirectToAction("Index", "Home");
             }
-           
-            return View();
         }
     }
 }
