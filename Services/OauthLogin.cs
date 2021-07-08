@@ -14,7 +14,7 @@ namespace HotteokChatBot.Services
     {
         string Client_Id = "sxcnv1raabwrh5m720t5dhk1xll9rp";
         string Client_Secret = "2j11j1hvdzhx2rfhtcdtalw0oyi5rw";
-        string Redirect_Uri = "https://localhost:44383/Login/Login";
+        string Redirect_Uri = "https://localhost:44384/Login/Login";
         string Scope = "user:edit chat:read chat:edit";
 
         
@@ -42,6 +42,7 @@ namespace HotteokChatBot.Services
         /// <summary>
         /// access_token, refresh_token 얻기
         /// </summary>
+        /// <param name="Code"></param>
         /// <returns></returns>
         public JObject Get_Token(string Code)
         {

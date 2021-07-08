@@ -11,9 +11,17 @@ namespace HotteokChatBot.Services
     public class TwitchBotDemo
     {
         // Bot settings
-        private static string _botName = "Hotteok";
-        private static string _broadcasterName = "wlh4202";
-        private static string _twitchOAuth = "oauth:bwly4i6ra704f9u02awpvuqv9f8a65"; // get chat bot's oauth from www.twitchapps.com/tmi/
+        private string _botName; //채팅봇 이름
+        private string _broadcasterName; //스트리머 채널 이름
+        private string _twitchOAuth; // oauth 코드
+
+
+        public TwitchBotDemo(string _botName, string _broadcasterName, string _twitchOAuth)
+        {
+            this._botName = _botName;
+            this._broadcasterName = _broadcasterName;
+            this._twitchOAuth = _twitchOAuth;
+        }
 
         public void BotStart()
         {
@@ -32,13 +40,14 @@ namespace HotteokChatBot.Services
             {
                 // 챗방으로부터 메세지 읽기
                 string message = irc.ReadMessage();
-                Console.WriteLine(message); // irc메시지 출력
+                //Console.WriteLine(message); // irc메시지 출력
 
+                //message가 null일때 실행할 코드 삽입
 
                 if (message.Contains("PRIVMSG"))
                 {
-                    // Messages from the users will look something like this (without quotes):
-                    // Format: ":[user]![user]@[user].tmi.twitch.tv PRIVMSG #[channel] :[message]"
+                    //유저가보낸 메세지는 아래 형식으로 보여진다.
+                    // 형식: ":[user]![user]@[user].tmi.twitch.tv PRIVMSG #[channel] :[message]"
 
                     // Modify message to only retrieve user and message
                     int intIndexParseSign = message.IndexOf('!');
@@ -50,7 +59,7 @@ namespace HotteokChatBot.Services
 
                     Console.WriteLine(message); // Print parsed irc message (debugging only)
 
-                    // Broadcaster commands
+                    // 스트리머 명령어
                     if (userName.Equals(_broadcasterName))
                     {
                         if (message.Equals("!exitbot"))
@@ -60,7 +69,7 @@ namespace HotteokChatBot.Services
                         }
                     }
 
-                    // General commands anyone can use
+                    // 누구나 사용할 수 있는 명령어
                     if (message.Equals("!hello"))
                     {
                         irc.SendPublicChatMessage("Hello World!");
@@ -92,9 +101,9 @@ namespace HotteokChatBot.Services
                 _inputStream = new StreamReader(_tcpClient.GetStream());
                 _outputStream = new StreamWriter(_tcpClient.GetStream());
 
-                // Try to join the room
-                _outputStream.WriteLine("PASS " + password);
-                _outputStream.WriteLine("NICK " + userName);
+                // 채널로 Join요청
+                _outputStream.WriteLine("PASS " + password); //oauth token
+                _outputStream.WriteLine("NICK " + userName); //Twitch username(login name)
                 _outputStream.WriteLine("USER " + userName + " 8 * :" + userName);
                 _outputStream.WriteLine("JOIN #" + channel);
                 _outputStream.Flush();

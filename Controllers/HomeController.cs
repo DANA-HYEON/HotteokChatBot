@@ -20,6 +20,12 @@ namespace HotteokChatBot.Controllers
 
         public IActionResult Index()
         {
+            string Access_Token = HttpContext.Request.Cookies["access_token"];
+            if (Access_Token != null)
+            {
+                return RedirectToAction("Index", "ChatBot");
+            }
+
             return View();
         }
 

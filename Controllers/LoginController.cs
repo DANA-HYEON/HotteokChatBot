@@ -15,6 +15,7 @@ namespace HotteokChatBot.Controllers
     {
         private OauthLogin OauthLoginService;
 
+
         public LoginController()
         {
             OauthLoginService = new OauthLogin();
@@ -23,12 +24,26 @@ namespace HotteokChatBot.Controllers
 
         public IActionResult Index()
         {
+            string Access_Token = HttpContext.Request.Cookies["access_token"];
+            if(Access_Token != null)
+            {
+                return RedirectToAction("Index", "ChatBot");
+            }
+
             return View();
         }
 
-
+       
+       [Route("/Login/Login"),HttpGet]
        public IActionResult Login()
         {
+            string Access_Token = HttpContext.Request.Cookies["access_token"];
+            if (Access_Token != null)
+            {
+                return RedirectToAction("Index", "ChatBot");
+            }
+
+
             //url에서 ?code= 값 가져오기
             string Code = Request.Query["code"];
 
@@ -43,13 +58,13 @@ namespace HotteokChatBot.Controllers
                 //토큰 요청
                 JObject token = OauthLoginService.Get_Token(Code);
 
-                string Access_Token = token["access_token"].ToString();
+                Access_Token = token["access_token"].ToString();
                 string Refresh_Token = token["refresh_token"].ToString();
 
                 //로그인 인증정보 요청
                 JObject User = OauthLoginService.Get_User(Access_Token);
 
-                string User_Id = User["user_id"].ToString(); //트위치 external key
+                long User_Id = User["user_id"].ToObject<long>(); //트위치 external key
                 string User_Login = User["login"].ToString(); //channel name
                 
                 using (var db = new HotteokDbContext())
@@ -58,7 +73,7 @@ namespace HotteokChatBot.Controllers
                     if(user == null)
                     {
                         User model = new User();
-                        model.User_Id = long.Parse(User_Id);
+                        model.User_Id = User_Id;
                         model.User_login = User_Login;
                         model.Refresh_Token = Refresh_Token;
 
@@ -71,10 +86,22 @@ namespace HotteokChatBot.Controllers
                 Response.Cookies.Append("access_token", Access_Token);
                 //CookieOptions Options = new CookieOptions();
                 Response.Cookies.Append("channel_name", User_Login); //쿠키에 채널이름 저장
-                Response.Cookies.Append("User_Id", User_Id); //쿠키에 enxternal key 저장
+                Response.Cookies.Append("User_Id", User["user_id"].ToString()); //쿠키에 enxternal key 저장
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index","ChatBot");
             }
         }
+
+        public IActionResult Logout()
+        {
+            //쿠키 삭제
+            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("channel_name");
+            Response.Cookies.Delete("User_Id");
+
+            return RedirectToAction("Index", "Home");
+        }
+
+
     }
 }
