@@ -2,6 +2,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    var entry_status = TempData["entry_status"] as string;
 }
 
 
@@ -9,7 +10,9 @@
     <h1>호떡이 채널 입장</h1>
     <h3>현재 호떡이가 채널에 안들어가고 놀고 있어요.</h3>
 
-    <a type="button" class="btn btn-primary" href="/ChatBot/ChatBotStart">입장시키려면 클릭!</a>
+    <form id="frm" asp-controller="ChatBot" asp-action="ChatBotStart" method="GET">
+        <button type="submit" id="channel_button" class="btn btn-primary">입장시키려면 클릭!</button>
+    </form>
 
     <h6 style="margin-top:100px;">호떡이 이용방법</h6>
 
@@ -24,4 +27,35 @@
 
 <script>
 
+    window.onload = function () {
+    var button = document.getElementById("channel_button");
+    var frm = document.getElementById("frm");
+
+    var entry_status = "@entry_status";
+
+        if (entry_status == "start") {
+            button.innerHTML = "퇴장시키려면 클릭!";
+            button.className = "btn btn-danger";
+            frm.action = "/ChatBot/ChatBotStop"
+        }
+
+        if (entry_status == "stop") {
+            button.innerHTML = "입장시키려면 클릭!";
+            button.className = "btn btn-primary";
+            frm.action = "/ChatBot/ChatBotStart"
+        }
+    }
+
+@*    button.addEventListener("click", function (e) {
+
+        //e.preventDefault(); //a태그 기본동작 막기
+        //console.log("test");
+
+        if (entry_status == "") {
+            frm.submit();
+        }
+
+
+        frm.submit();
+    });*@
 </script>

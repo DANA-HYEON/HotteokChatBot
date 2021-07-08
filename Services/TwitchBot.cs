@@ -8,25 +8,26 @@ using System.Threading.Tasks;
 
 namespace HotteokChatBot.Services
 {
-    public class TwitchBotDemo
+    public class TwitchBot
     {
         // Bot settings
-        private string _botName; //채팅봇 이름
+        private string _botName;//채팅봇 이름
         private string _broadcasterName; //스트리머 채널 이름
-        private string _twitchOAuth; // oauth 코드
+        private string _twitchOAuth; //oauth 코드
 
-
-        public TwitchBotDemo(string _botName, string _broadcasterName, string _twitchOAuth)
+        public TwitchBot(string _botName, string _broadcasterName, string _twitchOAuth)
         {
             this._botName = _botName;
             this._broadcasterName = _broadcasterName;
             this._twitchOAuth = _twitchOAuth;
         }
 
+
         public void BotStart()
         {
-            // Initialize and connect to Twitch chat
+            // 트위치로 연결
             IrcClient irc = new IrcClient("irc.twitch.tv", 6667, _botName, _twitchOAuth, _broadcasterName);
+            irc.Join(); //채널 접속
 
             // 서버에 ping하여 이 봇이 채팅에 계속 연결되어 있는지 확인
             // 서버는 pong하여 이 본에 응답
@@ -36,7 +37,7 @@ namespace HotteokChatBot.Services
 
 
             //프로그램이 종료될때까지 챗방 읽기
-            while (true) //연결중인걸 파악할 수 있는 조건 으로 돌리기
+            while (true) //연결중인걸 파악할 수 있는 조건 으로 돌릴수 있게 코드 수정 예정
             {
                 // 챗방으로부터 메세지 읽기
                 string message = irc.ReadMessage();
@@ -77,6 +78,15 @@ namespace HotteokChatBot.Services
                 }
             }
         }
+
+
+        //채팅봇 로그아웃
+        internal void BotStop()
+        {
+            // 트위치로 연결
+            IrcClient irc = new IrcClient("irc.twitch.tv", 6667, _botName, _twitchOAuth, _broadcasterName);
+            irc.Part(); //채널 나가기
+        }
     }
 
     // Reference: https://www.youtube.com/watch?v=Ss-OzV9aUZg
@@ -84,6 +94,7 @@ namespace HotteokChatBot.Services
     {
         public string userName; //채팅봇 이름
         private string channel; //join할 채널 이름
+        private string password; //oauth token(호떡)
 
         private TcpClient _tcpClient; //클라이언트에서는 서버에 연결 요청을 하는 역할
                                       //서버에서는 클라이언트의 요청을 수락하면 클라이언트와의 통신에 사용할 수 있는 TcpClient의 인스턴스가 반환
@@ -105,13 +116,29 @@ namespace HotteokChatBot.Services
                 _outputStream.WriteLine("PASS " + password); //oauth token
                 _outputStream.WriteLine("NICK " + userName); //Twitch username(login name)
                 _outputStream.WriteLine("USER " + userName + " 8 * :" + userName);
-                _outputStream.WriteLine("JOIN #" + channel);
+                //_outputStream.WriteLine("JOIN #" + channel);
                 _outputStream.Flush();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        //채널 가입
+        public void Join()
+        {
+            // 채널로 Join요청
+            _outputStream.WriteLine("JOIN #" + channel);
+            _outputStream.Flush();
+        }
+
+        //채널 나가기
+        public void Part()
+        {
+            // 채널로 나가기요청
+            _outputStream.WriteLine("PART #" + channel);
+            _outputStream.Flush();
         }
 
         public void SendIrcMessage(string message)
