@@ -1,4 +1,7 @@
+using HotteokChatBot.Controllers;
 using HotteokChatBot.Data;
+using HotteokChatBot.Models;
+using HotteokChatBot.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,6 +42,12 @@ namespace HotteokChatBot
             .EnableDetailedErrors() //저장소 쿼리 결과를 처리 하는 동안 발생 하는 데이터 값 예외를 처리할 때 자세한 오류를 사용)
             );
 
+            string Client_Id = Configuration.GetValue<string>("BotSetting:Client_Id");
+            string Client_Secret = Configuration.GetValue<string>("BotSetting:Client_Secret");
+            string Redirect_Uri = Configuration.GetValue<string>("BotSetting:Redirect_Uri");
+            string Scope = Configuration.GetValue<string>("BotSetting:Scope");
+
+            services.Add(new ServiceDescriptor(typeof(OauthLogin), new OauthLogin(Client_Id, Client_Secret, Redirect_Uri, Scope)));
             services.AddControllersWithViews();
         }
 

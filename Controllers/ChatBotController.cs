@@ -50,8 +50,7 @@ namespace HotteokChatBot.Controllers
 
         public IActionResult ChatBotStop()
         {
-            TwitchBot a = ChatBot_Thread();
-            a.BotStop();
+            //로그아웃 기능 개발
 
             TempData["entry_status"] = "stop";
 

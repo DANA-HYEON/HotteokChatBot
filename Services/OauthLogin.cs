@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using HotteokChatBot.Models;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,18 +15,35 @@ namespace HotteokChatBot.Services
 {
     public class OauthLogin
     {
-        string Client_Id = "sxcnv1raabwrh5m720t5dhk1xll9rp";
+
+        string Client_Id;
+        string Client_Secret;
+        string Redirect_Uri;
+        string Scope;
+
+        public OauthLogin() { }
+
+        public OauthLogin(string Client_Id, string Client_Secret, string Redirect_Uri, string Scope)
+        {
+            this.Client_Id = Client_Id;
+            this.Client_Secret = Client_Secret;
+            this.Redirect_Uri = Redirect_Uri;
+            this.Scope = Scope;
+        }
+
+
+/*        string Client_Id = "sxcnv1raabwrh5m720t5dhk1xll9rp";
         string Client_Secret = "2j11j1hvdzhx2rfhtcdtalw0oyi5rw";
         string Redirect_Uri = "https://localhost:44384/Login/Login";
-        string Scope = "user:edit chat:read chat:edit";
+        string Scope = "user:edit chat:read chat:edit";*/
 
-        
         /// <summary>
         /// access_token을 얻기위한 인증코드 얻기
         /// </summary>
         /// <returns></returns>
         public string Get_AuthorizeCode()
         {
+
             string Url = $"https://id.twitch.tv/oauth2/authorize?response_type=code&client_id={Client_Id}&redirect_uri={Redirect_Uri}&scope={Scope}";
 
             WebRequest request = WebRequest.Create(Url);

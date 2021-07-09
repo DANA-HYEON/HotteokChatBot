@@ -3,6 +3,7 @@ using HotteokChatBot.Models;
 using HotteokChatBot.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace HotteokChatBot.Controllers
 {
     public class LoginController : Controller
     {
-        private OauthLogin OauthLoginService;
+        private OauthLogin oauthLogin;
 
-
-        public LoginController()
+        //객체 주입 
+        public LoginController(OauthLogin oauthLoginService)
         {
-            OauthLoginService = new OauthLogin();
+            oauthLogin = oauthLoginService;
         }
 
 
@@ -50,19 +51,19 @@ namespace HotteokChatBot.Controllers
             //코드값이 없으면
             if (string.IsNullOrEmpty(Code))
             {
-                string Redirected_Url = OauthLoginService.Get_AuthorizeCode(); //트위치에 인증코드 요청
+                string Redirected_Url = oauthLogin.Get_AuthorizeCode(); //트위치에 인증코드 요청
                 return Redirect(Redirected_Url); //받은 리디렉션 url로 Redirect
             }
             else 
             {
                 //토큰 요청
-                JObject token = OauthLoginService.Get_Token(Code);
+                JObject token = oauthLogin.Get_Token(Code);
 
                 Access_Token = token["access_token"].ToString();
                 string Refresh_Token = token["refresh_token"].ToString();
 
                 //로그인 인증정보 요청
-                JObject User = OauthLoginService.Get_User(Access_Token);
+                JObject User = oauthLogin.Get_User(Access_Token);
 
                 long User_Id = User["user_id"].ToObject<long>(); //트위치 external key
                 string User_Login = User["login"].ToString(); //channel name
